@@ -19,7 +19,7 @@ export default function Login() {
         try {
             const res = await authApi.login(form.email, form.password)
             const token = res.data.access_token
-            const me = await authApi.me(token)
+            const me = await authApi.me()
             setAuth(token, me.data)
             toast.success(`Welcome back, ${me.data.full_name.split(' ')[0]}!`)
             navigate(me.data.role === 'investigator' ? '/investigator' : '/dashboard')
@@ -46,10 +46,10 @@ export default function Login() {
                     </blockquote>
                     <div className="grid grid-cols-2 gap-4">
                         {[
-                            { val: '5,432', label: 'FNDDS Foods' },
-                            { val: '99.5%', label: 'ML Accuracy' },
+                            { val: '5,400+', label: 'Verified Foods' },
                             { val: 'ADA 2024', label: 'Guidelines' },
-                            { val: '4 Modules', label: 'Rule Engine' },
+                            { val: '4 Pillars', label: 'Health Focus' },
+                            { val: 'Clinical', label: 'Evidence-Based' },
                         ].map(({ val, label }) => (
                             <div key={label} className="bg-white/5 rounded-xl p-4">
                                 <p className="font-display text-2xl text-whiteout">{val}</p>
