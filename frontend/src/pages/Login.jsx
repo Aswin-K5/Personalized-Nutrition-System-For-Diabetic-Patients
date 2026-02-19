@@ -19,7 +19,7 @@ export default function Login() {
         try {
             const res = await authApi.login(form.email, form.password)
             const token = res.data.access_token
-            const me = await authApi.me()
+            const me = await authApi.me(token)
             setAuth(token, me.data)
             toast.success(`Welcome back, ${me.data.full_name.split(' ')[0]}!`)
             navigate(me.data.role === 'investigator' ? '/investigator' : '/dashboard')
