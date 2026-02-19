@@ -100,10 +100,10 @@ def _generate_ml_plan(profile: PatientProfile, dietary_record, db: Session, user
         target_sodium_mg=targets["sodium"],
         target_added_sugar_g=targets["sugar"],
         triggered_rules=[{
-            "rule_name": "ML_PREDICTION",
+            "rule_name": "SMART_ANALYSIS",
             "triggered": True,
-            "reason": f"ML model predicted risk: {risk_cat} | Plan type: {plan_type}",
-            "recommendations": [f"ML-recommended: {plan_type.replace('_', ' ')} approach"]
+            "reason": f"Analysis shows {risk_cat} metabolic risk | Recommended approach: {plan_type}",
+            "recommendations": [f"Recommended dietary pattern: {plan_type.replace('_', ' ')}"]
         }],
         food_recommendations=ml_food_recs,
         lifestyle_reminders=[
@@ -136,15 +136,15 @@ def _ml_food_recommendations(plan_type: str) -> list:
         "Low-GI_Lipid-Control": [
             {"category": "Low-GI Staples", "action": "increase",
              "foods": ["Lentils", "Chickpeas", "Barley", "Steel-cut oats", "Sweet potato"],
-             "reason": "ML-identified primary risk: hyperglycemia + dyslipidemia"},
+             "reason": "Your health data indicates focus needed on blood sugar and cholesterol control"},
             {"category": "Omega-3 Sources", "action": "increase",
              "foods": ["Atlantic salmon", "Sardines", "Mackerel", "Flaxseed", "Walnuts"],
-             "reason": "TG-lowering EPA/DHA omega-3 fatty acids"},
+             "reason": "Omega-3 fatty acids help lower triglycerides"},
         ],
         "Caloric-Deficit_TRE": [
             {"category": "High-Volume Low-Calorie", "action": "increase",
              "foods": ["Leafy greens", "Cucumber", "Zucchini", "Broth-based soups", "Berries"],
-             "reason": "ML-identified primary risk: abdominal obesity — maximize satiety per calorie"},
+             "reason": "Your health data indicates focus on weight management — these foods maximize fullness"},
             {"category": "Calorie-Dense Foods", "action": "decrease",
              "foods": ["Fried foods", "Pastries", "Nuts (excess)", "Avocado (excess)", "Cheese"],
              "reason": "Reduce energy density while maintaining nutrient adequacy"},
@@ -152,20 +152,20 @@ def _ml_food_recommendations(plan_type: str) -> list:
         "Anti-Inflammatory_Mediterranean": [
             {"category": "Mediterranean Staples", "action": "increase",
              "foods": ["Extra virgin olive oil", "Tomatoes", "Eggplant", "Lentils", "Fresh herbs"],
-             "reason": "ML-identified primary risk: systemic inflammation"},
+             "reason": "Your health data indicates focus on reducing inflammation"},
             {"category": "Refined/Processed", "action": "avoid",
              "foods": ["Ultra-processed snacks", "Processed meats", "Refined grains", "Trans fats"],
-             "reason": "Key drivers of CRP elevation in ML feature importance"},
+             "reason": "These foods drive inflammation markers"},
         ],
         "Comprehensive_Metabolic": [
             {"category": "Metabolic-Protective Foods", "action": "increase",
              "foods": ["Non-starchy vegetables", "Fatty fish", "Legumes", "Whole grains", "Nuts"],
-             "reason": "ML: multiple concurrent metabolic risk factors detected"},
+             "reason": "Your health data shows multiple metabolic concerns — these foods provide comprehensive benefits"},
         ],
         "General_Healthy": [
             {"category": "General Healthy Pattern", "action": "increase",
              "foods": ["Vegetables (5+ servings)", "Whole fruits", "Lean proteins", "Whole grains"],
-             "reason": "ML: low metabolic risk — maintain preventive healthy diet"},
+             "reason": "Your health data looks good — maintain a preventive healthy diet"},
         ],
     }
     return rec_map.get(plan_type, rec_map["General_Healthy"])
@@ -280,12 +280,12 @@ def compare_models(
 
     key_differences = []
     if rule_plan.low_gi_plan != ml_plan.low_gi_plan:
-        key_differences.append("Low-GI plan: Disagreement between rule engine and ML model")
+        key_differences.append("Low-GI plan: Different recommendations between analysis methods")
     if rule_plan.calorie_deficit_plan != ml_plan.calorie_deficit_plan:
-        key_differences.append("Caloric deficit: Rule engine and ML differ on obesity treatment priority")
+        key_differences.append("Caloric deficit: Different approaches to weight management priority")
     if abs((rule_plan.target_carb_percent or 45) - (ml_plan.target_carb_percent or 45)) > 10:
         key_differences.append(
-            f"Carb target: Rule={rule_plan.target_carb_percent}% vs ML={ml_plan.target_carb_percent}%"
+            f"Carb target: Clinical={rule_plan.target_carb_percent}% vs Smart={ml_plan.target_carb_percent}%"
         )
 
     risk_profile = {
